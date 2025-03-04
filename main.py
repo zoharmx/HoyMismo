@@ -4,7 +4,7 @@ import requests
 app = FastAPI()
 
 # Token de autenticación de HubSpot (de tu app privada)
-HUBSPOT_API_KEY = "pat-na1-2269116f-61f4-4a0e-8360-5b288bc75ac"
+HUBSPOT_API_KEY = "pat-na1-2269116f-61f4-4a0e-8360-5b2888bc75ac"
 
 # Endpoint de HubSpot para consultar contactos
 HUBSPOT_SEARCH_URL = "https://api.hubapi.com/crm/v3/objects/contacts/search"
