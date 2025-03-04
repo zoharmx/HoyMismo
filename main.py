@@ -1,11 +1,13 @@
+import os
 from fastapi import FastAPI, Query
 import requests
 
 app = FastAPI()
 
-# Lee la clave de HubSpot de una variable de entorno
-HUBSPOT_API_KEY = os.environ.get("HUBSPOT_API_KEY")
+# Leemos la clave desde una variable de entorno (Render, o local)
+HUBSPOT_API_KEY = os.environ.get("HUBSPOT_API_KEY")  # <--- SIN token en el código
 
+# Endpoint de HubSpot para consultar contactos
 HUBSPOT_SEARCH_URL = "https://api.hubapi.com/crm/v3/objects/contacts/search"
 
 @app.get("/consultar-tramite")
