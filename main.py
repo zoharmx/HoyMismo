@@ -3,10 +3,9 @@ import requests
 
 app = FastAPI()
 
-# Token de autenticación de HubSpot (de tu app privada)
-HUBSPOT_API_KEY = "pat-na1-2269116f-61f4-4a0e-8360-5b2888bc75ac"
+# Lee la clave de HubSpot de una variable de entorno
+HUBSPOT_API_KEY = os.environ.get("HUBSPOT_API_KEY")
 
-# Endpoint de HubSpot para consultar contactos
 HUBSPOT_SEARCH_URL = "https://api.hubapi.com/crm/v3/objects/contacts/search"
 
 @app.get("/consultar-tramite")
@@ -19,7 +18,6 @@ def consultar_tramite(email: str, numero_guia: str):
         "Content-Type": "application/json"
     }
 
-    # Buscar el contacto en HubSpot por correo electrónico
     payload = {
         "filterGroups": [{
             "filters": [{"propertyName": "email", "operator": "EQ", "value": email}]
