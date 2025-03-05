@@ -4,16 +4,16 @@ from fastapi import FastAPI
 
 app = FastAPI()
 
-# Obtener el token de HubSpot desde variables de entorno
 HUBSPOT_API_KEY = os.getenv("HUBSPOT_API_KEY")
 
-# URL de HubSpot para consultar contactos
+# URL de HubSpot para consultar contactos (endpoint de búsqueda)
 HUBSPOT_SEARCH_URL = "https://api.hubapi.com/crm/v3/objects/contacts/search"
 
-@app.get("/consultar-tramite")
-def consultar_tramite(email: str):
+@app.get("/consultar-envio")
+def consultar_envio(email: str):
     """
-    Consulta en HubSpot el estado del trámite y otras propiedades basado en el email.
+    Consulta en HubSpot las propiedades del contacto relacionadas
+    al envío/paquete, basándose en el email.
     """
     headers = {
         "Authorization": f"Bearer {HUBSPOT_API_KEY}",
@@ -23,19 +23,24 @@ def consultar_tramite(email: str):
     # Búsqueda del contacto por email
     payload = {
         "filterGroups": [{
-            "filters": [{"propertyName": "email", "operator": "EQ", "value": email}]
+            "filters": [{
+                "propertyName": "email",
+                "operator": "EQ",
+                "value": email
+            }]
         }],
         "properties": [
-            "status",
             "firstname",
+            "estatus",
+            "destino",
+            "tracking_id",
+            "fecha_de_recoleccion",
+            "nombre_del_reseptor",
+            "tamano_de_la_caja",
+            "peso_del_paquete",
             "phone",
             "hs_whatsapp_phone_number",
-            "email",
-            "vehicle_color",
-            "vehicle_make",
-            "tracking_id",
-            "tipo_pedimento",
-            "vin_number"
+            "address"
         ]
     }
 
@@ -45,23 +50,25 @@ def consultar_tramite(email: str):
         data = response.json()
         if "results" in data and len(data["results"]) > 0:
             contacto = data["results"][0]["properties"]
-
-            # Devuelve la información del contacto
             return {
-                "estatus_tramite": contacto.get("status", "No disponible"),
+                "estatus": contacto.get("estatus", "No disponible"),
                 "nombre": contacto.get("firstname", "No disponible"),
+                "destino": contacto.get("destino", "No disponible"),
+                "numero_guia": contacto.get("tracking_id", "No disponible"),
+                "fecha_de_recoleccion": contacto.get("fecha_de_recoleccion", "No disponible"),
+                "nombre_del_receptor": contacto.get("nombre_del_reseptor", "No disponible"),
+                "tamano_de_la_caja": contacto.get("tamano_de_la_caja", "No disponible"),
+                "peso_del_paquete": contacto.get("peso_del_paquete", "No disponible"),
                 "telefono": contacto.get("phone", "No disponible"),
                 "whatsapp": contacto.get("hs_whatsapp_phone_number", "No disponible"),
-                "email": contacto.get("email", "No disponible"),
-                "color_vehiculo": contacto.get("vehicle_color", "No disponible"),
-                "marca_vehiculo": contacto.get("vehicle_make", "No disponible"),
-                "numero_guia": contacto.get("tracking_id", "No disponible"),
-                "tipo_pedimento": contacto.get("tipo_pedimento", "No disponible"),
-                "vin": contacto.get("vin_number", "No disponible"),
+                "direccion": contacto.get("address", "No disponible")
             }
         else:
             return {"error": "No se encontró el contacto con ese correo."}
     else:
-        return {"error": f"Error en la consulta a HubSpot: {response.text}"}
+        return {
+            "error": f"Error en la consulta a HubSpot: {response.status_code} - {response.text}"
+        }
+
 
 
