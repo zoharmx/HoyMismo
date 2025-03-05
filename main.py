@@ -13,7 +13,7 @@ HUBSPOT_SEARCH_URL = "https://api.hubapi.com/crm/v3/objects/contacts/search"
 @app.get("/consultar-tramite")
 def consultar_tramite(email: str):
     """
-    Consulta en HubSpot el estado del trámite y otras propiedades basado solo en el email.
+    Consulta en HubSpot el estado del trámite y otras propiedades basado en el email.
     """
     headers = {
         "Authorization": f"Bearer {HUBSPOT_API_KEY}",
@@ -26,12 +26,16 @@ def consultar_tramite(email: str):
             "filters": [{"propertyName": "email", "operator": "EQ", "value": email}]
         }],
         "properties": [
-            "estatus_tramite",
-            "marca",
-            "modelo",
-            "seguimiento",
-            "tipo_de_pedimento",
-            "vin"
+            "status",
+            "firstname",
+            "phone",
+            "hs_whatsapp_phone_number",
+            "email",
+            "vehicle_color",
+            "vehicle_make",
+            "tracking_id",
+            "tipo_pedimento",
+            "vin_number"
         ]
     }
 
@@ -42,14 +46,18 @@ def consultar_tramite(email: str):
         if "results" in data and len(data["results"]) > 0:
             contacto = data["results"][0]["properties"]
 
-            # Devuelve la información del contacto sin validar el número de guía
+            # Devuelve la información del contacto
             return {
-                "estatus_tramite": contacto.get("estatus_tramite", "No disponible"),
-                "marca": contacto.get("marca", "No disponible"),
-                "modelo": contacto.get("modelo", "No disponible"),
-                "seguimiento": contacto.get("seguimiento", "No disponible"),
-                "tipo_de_pedimento": contacto.get("tipo_de_pedimento", "No disponible"),
-                "vin": contacto.get("vin", "No disponible"),
+                "estatus_tramite": contacto.get("status", "No disponible"),
+                "nombre": contacto.get("firstname", "No disponible"),
+                "telefono": contacto.get("phone", "No disponible"),
+                "whatsapp": contacto.get("hs_whatsapp_phone_number", "No disponible"),
+                "email": contacto.get("email", "No disponible"),
+                "color_vehiculo": contacto.get("vehicle_color", "No disponible"),
+                "marca_vehiculo": contacto.get("vehicle_make", "No disponible"),
+                "numero_guia": contacto.get("tracking_id", "No disponible"),
+                "tipo_pedimento": contacto.get("tipo_pedimento", "No disponible"),
+                "vin": contacto.get("vin_number", "No disponible"),
             }
         else:
             return {"error": "No se encontró el contacto con ese correo."}
