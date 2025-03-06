@@ -14,8 +14,8 @@ def consultar_envio(email: str):
     """
 
     Consulta en HubSpot el estado del trámite y otras propiedades basado en el email (JSON).
-=======
-    Devuelve información en JSON (como ya tenías).
+
+    Devuelve información en JSON 
 
     """
     headers = {
@@ -29,7 +29,7 @@ def consultar_envio(email: str):
             "filters": [
                 {"propertyName": "email", "operator": "EQ", "value": email}
             ]
-=======
+
     payload = {
         "filterGroups": [{
             "filters": [{
@@ -37,7 +37,7 @@ def consultar_envio(email: str):
                 "operator": "EQ",
                 "value": email
             }]
->>>>>>> 9024bc815e52b6155a0edd433cda7b0b190d5b2f
+
         }],
         "properties": [
             "firstname",
@@ -62,7 +62,7 @@ def consultar_envio(email: str):
             contacto = data["results"][0]["properties"]
 
 
-=======
+
 
             return {
                 "estatus": contacto.get("estatus", "No disponible"),
