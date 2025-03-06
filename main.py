@@ -6,9 +6,7 @@ from fastapi.responses import HTMLResponse
 app = FastAPI()
 
 HUBSPOT_API_KEY = os.getenv("HUBSPOT_API_KEY")
-
 HUBSPOT_SEARCH_URL = "https://api.hubapi.com/crm/v3/objects/contacts/search"
-
 
 @app.get("/consultar-tramite")
 def consultar_tramite(email: str):
@@ -20,6 +18,7 @@ def consultar_tramite(email: str):
         "Content-Type": "application/json"
     }
 
+    # Aquí definimos las propiedades que deseas extraer
     payload = {
         "filterGroups": [{
             "filters": [{
@@ -29,17 +28,19 @@ def consultar_tramite(email: str):
             }]
         }],
         "properties": [
-            "estatus",
-            "marca",
+            "vehicle_color",
+            "status",
+            "vehicle_make",
             "modelo",
-            "numero_guia",
-            "seguimiento",
+            "tracking_id",
+            "tracking_number",
             "tipo_pedimento",
-            "vin",
+            "vin_number",
             "firstname",
             "phone",
-            "hs_whatsapp_phone_number",
-            "email"
+            "email",
+            "start_date",
+            "address"
         ]
     }
 
@@ -48,22 +49,45 @@ def consultar_tramite(email: str):
     if response.status_code == 200:
         data = response.json()
         if "results" in data and len(data["results"]) > 0:
-            contacto = data["results"][0]["properties"]
+            contacto = data["results"][0].get("properties", {})
 
+            # Retornamos las propiedades con las nuevas claves
             return {
-                "estatus": contacto.get("estatus", "No disponible"),
-                "marca": contacto.get("marca", "No disponible"),
+                "vehicle_color": contacto.get("vehicle_color", "No disponible"),
+                "status": contacto.get("status", "No disponible"),
+                "vehicle_make": contacto.get("vehicle_make", "No disponible"),
                 "modelo": contacto.get("modelo", "No disponible"),
-                "numero_guia": contacto.get("numero_guia", "No disponible"),
-                "seguimiento": contacto.get("seguimiento", "No disponible"),
+                "tracking_id": contacto.get("tracking_id", "No disponible"),
+                "tracking_number": contacto.get("tracking_number", "No disponible"),
                 "tipo_pedimento": contacto.get("tipo_pedimento", "No disponible"),
-                "vin": contacto.get("vin", "No disponible"),
-                "nombre": contacto.get("firstname", "No disponible"),
-                "telefono": contacto.get("phone", "No disponible"),
-                "whatsapp": contacto.get("hs_whatsapp_phone_number", "No disponible"),
-                "email": contacto.get("email", "No disponible")
+                "vin_number": contacto.get("vin_number", "No disponible"),
+                "firstname": contacto.get("firstname", "No disponible"),
+                "phone": contacto.get("phone", "No disponible"),
+                "email": contacto.get("email", "No disponible"),
+                "start_date": contacto.get("start_date", "No disponible"),
+                "address": contacto.get("address", "No disponible")
             }
         else:
             return {"error": "No se encontró el contacto con ese correo."}
     else:
-        return {"error": f"Error en la consulta a HubSpot: {response.status_code} - {response.text}"}
+        return {
+            "error": f"Error en la consulta a HubSpot: {response.status_code} - {response.text}"
+        }
+
+# (Opcional) Si deseas un endpoint HTML, podrías crearlo:
+@app.get("/consultar-tramite-html", response_class=HTMLResponse)
+def consultar_tramite_html(email: str):
+    """
+    Versión HTML opcional que muestra datos en tabla.
+    """
+    data = consultar_tramite(email)
+    if "error" in data:
+        return f"<h1>Error: {data['error']}</h1>"
+
+    html = "<html><head><title>Trámite - Info</title></head><body>"
+    html += "<h1>Detalle del Trámite</h1><table border='1'>"
+    for key, val in data.items():
+        html += f"<tr><th>{key}</th><td>{val}</td></tr>"
+    html += "</table></body></html>"
+    return html
+
