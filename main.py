@@ -1,11 +1,20 @@
 import os
 import requests
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 
-HUBSPOT_API_KEY = os.getenv("HUBSPOT_API_KEY")
+# 🔹 Configuración de CORS para permitir solicitudes desde cualquier dominio
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Puedes cambiar "*" por dominios específicos si es necesario
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
+HUBSPOT_API_KEY = os.getenv("HUBSPOT_API_KEY")
 HUBSPOT_SEARCH_URL = "https://api.hubapi.com/crm/v3/objects/contacts/search"
 
 @app.get("/consultar-tramite")
@@ -66,6 +75,6 @@ def consultar_tramite(email: str):
                 "direccion": contacto.get("address", "No disponible")
             }
         else:
-            return {"error": "No se encontró el contacto con ese correo."}
+            return {"error": "No se encontró el trámite con ese correo."}
     else:
         return {"error": f"Error en la consulta a HubSpot: {response.status_code} - {response.text}"}
